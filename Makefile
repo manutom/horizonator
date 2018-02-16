@@ -1,4 +1,6 @@
-CC := gcc-4.9
+CC  := gcc
+CXX := g++
+
 CPPFLAGS += -MMD
 CPPFLAGS += -ggdb3 -O3
 CFLAGS   += -std=gnu11
@@ -23,7 +25,7 @@ LDLIBS_HORIZON := \
 
 # slippy-map compile time stuff
 CPPFLAGS_HORIZON := \
- -Iflorb -Iflorb/Fl \
+ -Iflorb/src \
  $(shell pkg-config --cflags glu) \
  $(shell pkg-config --cflags glew) \
  $(shell fltk-config --use-images --cxxflags) \
@@ -45,9 +47,9 @@ LDLIBS   += -lopencv_imgproc -lopencv_highgui -lopencv_core
 
 
 
-FLORB_SOURCES := $(wildcard $(addprefix florb/,*.cpp *.cc Fl/*.cpp))
+FLORB_SOURCES := $(wildcard florb/src/*.cpp)
+FLORB_OBJECTS := #$(FLORB_SOURCES:.cpp=.o)
 
-FLORB_OBJECTS   := $(addsuffix .o,$(basename $(FLORB_SOURCES)))
 HORIZON_OBJECTS := render_terrain.o main.o points_of_interest.o fltk_annotated_image.o dem_downloader.o dem_access.o orb_renderviewlayer.o Fl_Scroll_Draggable.o
 
 
@@ -73,7 +75,7 @@ features_generated.h: $(wildcard *Features*.txt) parse_features.pl
 points_of_interest.o: features_generated.h
 
 clean:
-	rm -rf $(TARGETS) features_generated.h *.o *.glsl.h *.d florb/*.o florb/*.d florb/Fl/*.o florb/Fl/*.d
+	rm -rf $(TARGETS) features_generated.h *.o *.glsl.h *.d florb/src/*.o florb/src/*.d
 
 .PHONY: clean
 

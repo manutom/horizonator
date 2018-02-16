@@ -9,9 +9,9 @@
 
 #include "Fl_Scroll_Draggable.hh"
 #include "fltk_annotated_image.hh"
-#include "orb_osmlayer.hpp"
+#include "osmlayer.hpp"
 #include "orb_renderviewlayer.hh"
-#include "orb_mapctrl.hpp"
+#include "florb/src/wgt_map.hpp"
 
 #include "render_terrain.h"
 
@@ -26,7 +26,7 @@ static CvFltkWidget_annotated* widgetImage;
 static void cb_slippymap( Fl_Widget* widget, void* cookie );
 static void cb_render_scroll_clicked(Fl_Widget* widget,
                                      void*      cookie );
-static void redraw_slippymap( void* mapctrl );
+static void redraw_slippymap( void* wgt_map );
 
 int main(int argc, char** argv)
 {
@@ -141,41 +141,41 @@ int main(int argc, char** argv)
 
   Fl::lock();
 
-  std::vector<orb_layer*> layers;
-  orb_mapctrl*            mapctrl;
-  orb_renderviewlayer*    renderviewlayer;
+  std::vector<florb::layer*> layers;
+  florb::wgt_map*            wgt_map;
+  orb_renderviewlayer*       renderviewlayer;
 
   Fl_Double_Window* window = new Fl_Double_Window( WINDOW_W, WINDOW_H, "Horizonator" );
   const int         map_h  = window->h()/2;
 
   {
-    mapctrl = new orb_mapctrl( 0, 0, window->w(), map_h, "Slippy Map" );
-    mapctrl->box(FL_NO_BOX);
-    mapctrl->color(FL_BACKGROUND_COLOR);
-    mapctrl->selection_color(FL_BACKGROUND_COLOR);
-    mapctrl->labeltype(FL_NORMAL_LABEL);
-    mapctrl->labelfont(0);
-    mapctrl->labelsize(14);
-    mapctrl->labelcolor(FL_FOREGROUND_COLOR);
-    mapctrl->align(Fl_Align(FL_ALIGN_CENTER));
+    wgt_map = new florb::wgt_map( 0, 0, window->w(), map_h, "Slippy Map" );
+    wgt_map->box(FL_NO_BOX);
+    wgt_map->color(FL_BACKGROUND_COLOR);
+    wgt_map->selection_color(FL_BACKGROUND_COLOR);
+    wgt_map->labeltype(FL_NORMAL_LABEL);
+    wgt_map->labelfont(0);
+    wgt_map->labelsize(14);
+    wgt_map->labelcolor(FL_FOREGROUND_COLOR);
+    wgt_map->align(Fl_Align(FL_ALIGN_CENTER));
 
-    renderviewlayer        = new orb_renderviewlayer;
-    orb_osmlayer* osmlayer = new orb_osmlayer;
-    osmlayer->callback( &redraw_slippymap, mapctrl );
+    renderviewlayer           = new orb_renderviewlayer;
+    florb::osmlayer* osmlayer = new florb::osmlayer;
+    osmlayer->callback( &redraw_slippymap, wgt_map );
 
     layers.push_back(osmlayer);
     layers.push_back(renderviewlayer);
 
-    mapctrl->layers(layers);
+    wgt_map->layers(layers);
 
     // callback for the right mouse button
-    mapctrl->callback( &cb_slippymap, renderviewlayer );
+    wgt_map->callback( &cb_slippymap, renderviewlayer );
   }
   {
     render_scroll = new Fl_Scroll_Draggable( 0, map_h, window->w(), window->h() - map_h,
-                                             renderviewlayer, mapctrl );
+                                             renderviewlayer, wgt_map );
     render_scroll->end();
-    static void* cookie[] = {renderviewlayer, mapctrl};
+    static void* cookie[] = {renderviewlayer, wgt_map};
     render_scroll->callback( &cb_render_scroll_clicked, cookie );
   }
 
@@ -189,9 +189,9 @@ int main(int argc, char** argv)
   return 0;
 }
 
-static void redraw_slippymap( void* mapctrl )
+static void redraw_slippymap( void* wgt_map )
 {
-  reinterpret_cast<orb_mapctrl*>(mapctrl)->redraw();
+  reinterpret_cast<florb::wgt_map*>(wgt_map)->redraw();
 }
 
 
@@ -201,9 +201,9 @@ static void cb_slippymap(Fl_Widget* widget,
   if( Fl::event()        == FL_PUSH &&
       Fl::event_button() == FL_RIGHT_MOUSE )
   {
-    orb_point<double> gps;
+    florb::point<double> gps;
 
-    if( reinterpret_cast<orb_mapctrl*>(widget)->mousegps( gps ) != 0 )
+    if( reinterpret_cast<florb::wgt_map*>(widget)->mousegps( gps ) != 0 )
     {
       fprintf( stderr, "couldn't get mouse click latlon position for some reason...\n" );
       return;
@@ -254,7 +254,7 @@ static void cb_render_scroll_clicked(Fl_Widget* widget,
                                      void*      cookie)
 {
     orb_renderviewlayer* renderviewlayer = reinterpret_cast<orb_renderviewlayer*>( ((void**)cookie)[0] );
-    orb_mapctrl*         mapctrl         = reinterpret_cast<orb_mapctrl*>        ( ((void**)cookie)[1] );
+    florb::wgt_map*      wgt_map         = reinterpret_cast<florb::wgt_map*>        ( ((void**)cookie)[1] );
 
 
     Fl_Scroll* scroll = reinterpret_cast<Fl_Scroll*>(widget);
@@ -271,6 +271,6 @@ static void cb_render_scroll_clicked(Fl_Widget* widget,
         else
             renderviewlayer->unset_pick();
 
-        mapctrl->redraw();
+        wgt_map->redraw();
     }
 }

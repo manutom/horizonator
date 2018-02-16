@@ -8,15 +8,15 @@ orb_renderviewlayer::orb_renderviewlayer()
   name(std::string("Render-view layer"));
 };
 
-void orb_renderviewlayer::draw(const orb_viewport &viewport)
+void orb_renderviewlayer::draw(const florb::viewport &viewport)
 {
   if( lat < -500 || lon < -500 || left < -500 || right < -500 )
     return;
 
   fl_color( FL_BLUE );
 
-  orb_point<unsigned int> px;
-  orb_viewport::gps2px(viewport.z(), orb_point<double>(lon, lat), px);
+  florb::point<unsigned int> px;
+  florb::viewport::gps2px(viewport.z(), florb::orb_point<double>(lon, lat), px);
 
   int x = px.get_x() - viewport.x();
   int y = px.get_y() - viewport.y();
@@ -44,7 +44,7 @@ void orb_renderviewlayer::draw(const orb_viewport &viewport)
   if( have_pick )
   {
       fl_color( FL_RED );
-      orb_viewport::gps2px(viewport.z(), orb_point<double>(pick_lon, pick_lat), px);
+      florb::viewport::gps2px(viewport.z(), florb::point<double>(pick_lon, pick_lat), px);
       x = px.get_x() - viewport.x();
       y = px.get_y() - viewport.y();
       fl_begin_polygon();

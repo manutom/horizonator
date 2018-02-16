@@ -2,15 +2,15 @@
 
 #include <string>
 #include <stdbool.h>
-#include "orb_viewport.hpp"
-#include "orb_layer.hpp"
+#include "florb/src/viewport.hpp"
+#include "florb/src/osmlayer.hpp"
 
-class orb_renderviewlayer : public orb_layer
+class orb_renderviewlayer : public florb::osmlayer
 {
 public:
   orb_renderviewlayer();
 
-  void draw(const orb_viewport &viewport);
+  void draw(const florb::viewport &viewport);
 
 private:
   float lat, lon;
